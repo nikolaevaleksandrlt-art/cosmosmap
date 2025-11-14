@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import {
-  fetchSession,
-  logout,
-  type AuthUser,
-} from "@/core/coreClient";
+import { apiFetch } from "@/lib/api";
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  fullName?: string | null;
+}
 
 type AuthStatus = "loading" | "authenticated" | "unauthenticated";
 
@@ -22,9 +24,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function refresh() {
     try {
-      const session = await fetchSession();
-      setUser(session.user);
-      setStatus(session.user ? "authenticated" : "unauthenticated");
+      // /auth/me в твоём API
+      const session = await apiFetch("/auth/me", { method: "GET" });
+
+      const u =
+        (session as any)?.user ??
+        (session as any) ??
+        null; // подстраховка под разные форматы
+
+      setUser(u);
+      setStatus(u ? "authenticated" : "unauthenticated");
     } catch {
       setUser(null);
       setStatus("unauthenticated");
@@ -33,7 +42,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function signOut() {
     try {
-      await logout();
+      await apiFetch("/auth/logout", {
+        method: "POST",
+        body: JSON.stringify({}),
+      });
     } finally {
       setUser(null);
       setStatus("unauthenticated");
@@ -45,9 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider
-      value={{ status, user, refresh, signOut }}
-    >
+    <AuthContext.Provider value={{ status, user, refresh, signOut }}>
       {children}
     </AuthContext.Provider>
   );

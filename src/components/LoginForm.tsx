@@ -3,11 +3,8 @@ import { cn } from "../lib/utils";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import {
-  loginWithEmailPassword,
-  registerWithEmailPassword,
-  type EmailPasswordPayload,
-} from "../core/coreClient";
+
+import { apiFetch } from "../lib/api";
 
 export type AuthMode = "login" | "register";
 
@@ -22,8 +19,11 @@ export interface LoginFormProps extends NativeFormProps {
   onError?(error: Error): void;
 }
 
-
-
+// Локальный тип вместо coreClient
+interface EmailPasswordPayload {
+  email: string;
+  password: string;
+}
 
 export function LoginForm({
   mode = "login",
@@ -70,8 +70,14 @@ export function LoginForm({
 
       const data =
         mode === "login"
-          ? await loginWithEmailPassword(payload)
-          : await registerWithEmailPassword(payload);
+          ? await apiFetch("/auth/login/password", {
+              method: "POST",
+              body: JSON.stringify(payload),
+            })
+          : await apiFetch("/auth/register/email-password", {
+              method: "POST",
+              body: JSON.stringify(payload),
+            });
 
       onSuccess?.(data);
     } catch (error) {
@@ -149,7 +155,6 @@ export function LoginForm({
           {buttonLabel}
         </Button>
 
-        {/* Кнопка провайдера оставлена "как слот" под будущее OAuth */}
         <Button
           type="button"
           variant="outline"
