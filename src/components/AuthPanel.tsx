@@ -16,7 +16,7 @@ export function AuthPanel({
   mode = "auto",
   redirectTo = "/",
 }: AuthPanelProps) {
-  const { status, user, refreshSession, signOut } = useAuth();
+  const {  status, user, refresh, signOut } = useAuth();
   const [, navigate] = useLocation();
 
   const initialView: "login" | "register" =
@@ -31,7 +31,7 @@ export function AuthPanel({
   const handleAuthSuccess = async () => {
     setBusy(true);
     try {
-      await refreshSession();
+      await refresh();
       navigate(redirectTo);
     } catch (error) {
       console.error("Auth success but failed to refresh session", error);
