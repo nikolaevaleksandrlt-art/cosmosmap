@@ -95,7 +95,9 @@ export function AppSidebar() {
                         ? "bg-sidebar-accent text-sidebar-accent-foreground"
                         : ""
                     }
-                    data-testid={`link-${item.title.toLowerCase().replace(" ", "-")}`}
+                    data-testid={`link-${item.title
+                      .toLowerCase()
+                      .replace(" ", "-")}`}
                   >
                     <Link href={item.url}>
                       <item.icon className="w-4 h-4" />
